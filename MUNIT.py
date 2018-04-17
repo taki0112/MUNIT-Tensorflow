@@ -56,12 +56,12 @@ class MUNIT(object) :
 
         self.trainA_dataset = glob('./dataset/{}/*.*'.format(self.dataset_name + '/trainA'))
         self.trainB_dataset = glob('./dataset/{}/*.*'.format(self.dataset_name + '/trainB'))
-        self.all_dataset = max(len(self.trainA_dataset), len(self.trainB_dataset))
+        self.dataset_num = max(len(self.trainA_dataset), len(self.trainB_dataset))
 
         print("##### Information #####")
         print("# gan type : ", self.gan_type)
         print("# dataset : ", self.dataset_name)
-        print("# max dataset number : ", self.all_dataset)
+        print("# max dataset number : ", self.dataset_num)
         print("# batch_size : ", self.batch_size)
         print("# epoch : ", self.epoch)
         print("# iteration per epoch : ", self.iteration)
@@ -233,8 +233,8 @@ class MUNIT(object) :
         trainA = tf.data.Dataset.from_tensor_slices(self.trainA_dataset)
         trainB = tf.data.Dataset.from_tensor_slices(self.trainB_dataset)
 
-        trainA = trainA.prefetch(self.batch_size).shuffle(self.all_dataset).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
-        trainB = trainB.prefetch(self.batch_size).shuffle(self.all_dataset).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
+        trainA = trainA.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
+        trainB = trainB.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
 
         trainA_iterator = trainA.make_one_shot_iterator()
         trainB_iterator = trainB.make_one_shot_iterator()
