@@ -125,9 +125,9 @@ class MUNIT(object) :
         channel = self.mlp_dim
         with tf.variable_scope(scope, reuse=reuse) :
             mu, sigma = self.MLP(style, reuse)
-            x = None
+            x = contents
             for i in range(self.n_res) :
-                x = adaptive_resblock(contents, channel, mu, sigma, scope='adaptive_resblock'+str(i))
+                x = adaptive_resblock(x, channel, mu, sigma, scope='adaptive_resblock'+str(i))
 
             for i in range(self.n_upsample) :
                 x = up_sample(x, scale_factor=2)
@@ -271,7 +271,6 @@ class MUNIT(object) :
         else :
             cyc_recon_A = 0.0
             cyc_recon_B = 0.0
-
 
         real_A_logit, real_B_logit = self.discriminate_real(self.domain_A, self.domain_B)
         fake_A_logit, fake_B_logit = self.discriminate_fake(x_ba, x_ab)
@@ -418,11 +417,11 @@ class MUNIT(object) :
                 if np.mod(idx+1, self.print_freq) == 0 :
                     save_images(batch_A_images, [self.batch_size, 1],
                                 './{}/real_A_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
-                    save_images(batch_B_images, [self.batch_size, 1],
-                                './{}/real_B_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
+                    # save_images(batch_B_images, [self.batch_size, 1],
+                    #             './{}/real_B_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
 
-                    save_images(fake_A, [self.batch_size, 1],
-                                './{}/fake_A_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
+                    # save_images(fake_A, [self.batch_size, 1],
+                    #             './{}/fake_A_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
                     save_images(fake_B, [self.batch_size, 1],
                                 './{}/fake_B_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
 
@@ -578,5 +577,4 @@ class MUNIT(object) :
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
                         '../..' + os.path.sep + image_path), self.img_size, self.img_size))
                 index.write("</tr>")
-
         index.close()
