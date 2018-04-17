@@ -120,6 +120,14 @@ def L1_loss(x, y):
 
     return loss
 
+"""
+
+Author use LSGAN
+
+For LSGAN, multiply each of G and D by 0.5.
+However, MUNIT authors did not do this.
+
+"""
 def discriminator_loss(real, fake):
     n_scale = len(real)
     loss = []
@@ -127,7 +135,7 @@ def discriminator_loss(real, fake):
     for i in range(n_scale) :
         real_loss = tf.reduce_mean(tf.squared_difference(real[i], 1.0))
         fake_loss = tf.reduce_mean(tf.square(fake[i]))
-        loss.append((real_loss + fake_loss) * 0.5)
+        loss.append(real_loss + fake_loss)
 
     return sum(loss)
 
@@ -137,7 +145,8 @@ def generator_loss(fake):
     loss = []
 
     for i in range(n_scale) :
-        loss.append(tf.reduce_mean(tf.squared_difference(fake[i], 1.0)) * 0.5)
+        fake_loss = tf.reduce_mean(tf.squared_difference(fake[i], 1.0))
+        loss.append(fake_loss)
 
 
     return sum(loss)
