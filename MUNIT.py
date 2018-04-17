@@ -146,10 +146,10 @@ class MUNIT(object) :
 
             return x
 
-    def MLP(self, x, reuse=False, scope='MLP'):
+    def MLP(self, style, reuse=False, scope='MLP'):
         channel = self.mlp_dim
         with tf.variable_scope(scope, reuse=reuse) :
-            x = linear(x, channel, scope='linear_0')
+            x = linear(style, channel, scope='linear_0')
             x = relu(x)
 
             x = linear(x, channel, scope='linear_1')
