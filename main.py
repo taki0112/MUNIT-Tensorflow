@@ -6,7 +6,7 @@ from utils import *
 def parse_args():
     desc = "Tensorflow implementation of MUNIT"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--phase', type=str, default='train', help='train or test ?')
+    parser.add_argument('--phase', type=str, default='train', help='train or test or guide')
     parser.add_argument('--dataset', type=str, default='summer2winter', help='dataset_name')
 
     parser.add_argument('--epoch', type=int, default=10, help='The number of epochs to run')
@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
     parser.add_argument('--save_freq', type=int, default=1000, help='The number of ckpt_save_freq')
     parser.add_argument('--num_style', type=int, default=3, help='number of styles to sample')
+    parser.add_argument('--guide_img', type=str, default='guide.jpg', help='Style guided image translation')
 
     parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate')
     parser.add_argument('--gan_w', type=float, default=1.0, help='weight of adversarial loss')
@@ -98,6 +99,10 @@ def main():
         if args.phase == 'test' :
             gan.test()
             print(" [*] Test finished!")
+
+        if args.phase == 'guide' :
+            gan.style_guide_test()
+            print(" [*] Guide finished!")
 
 if __name__ == '__main__':
     main()

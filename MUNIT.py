@@ -21,6 +21,7 @@ class MUNIT(object) :
         self.print_freq = args.print_freq
         self.save_freq = args.save_freq
         self.num_style = args.num_style # for test
+        self.guide_img = args.guide_img
 
         self.img_size = args.img_size
         self.img_ch = args.img_ch
@@ -349,6 +350,14 @@ class MUNIT(object) :
         self.test_fake_A = self.Decoder_A(content_B=test_content_b, style_A=self.test_style, reuse=True)
         self.test_fake_B = self.Decoder_B(content_A=test_content_a, style_B=self.test_style, reuse=True)
 
+        """ Guided Image Translation """
+        self.content_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='content_image')
+        self.style_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='guide_style_image')
+
+        guide_content, _ = self.Encoder_A(self.content_image, reuse=True)
+        _, guide_style = self.Encoder_B(self.style_image, reuse=True)
+
+        self.guide_fake_image = self.Decoder_B(content_A=guide_content, style_B=guide_style, reuse=True)
 
     def train(self):
         # initialize all variables
@@ -475,7 +484,7 @@ class MUNIT(object) :
 
         for sample_file  in test_A_files : # A -> B
             print('Processing A image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file))
+            sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
             file_name = os.path.basename(sample_file).split(".")[0]
             file_extension = os.path.basename(sample_file).split(".")[1]
 
@@ -494,7 +503,7 @@ class MUNIT(object) :
 
         for sample_file  in test_B_files : # B -> A
             print('Processing B image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file))
+            sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
             file_name = os.path.basename(sample_file).split(".")[0]
             file_extension = os.path.basename(sample_file).split(".")[1]
 
@@ -510,4 +519,42 @@ class MUNIT(object) :
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
                         '../..' + os.path.sep + image_path), self.img_size, self.img_size))
                 index.write("</tr>")
+        index.close()
+
+    def style_guide_test(self):
+        tf.global_variables_initializer().run()
+        test_A_files = glob('./dataset/{}/*.*'.format(self.dataset_name + '/testA'))
+        style_file = np.asarray(load_test_data(self.guide_img, size=self.img_size))
+
+        self.saver = tf.train.Saver()
+        could_load, checkpoint_counter = self.load(self.checkpoint_dir)
+        self.result_dir = os.path.join(self.result_dir, self.model_dir, 'guide')
+        check_folder(self.result_dir)
+
+        if could_load:
+            print(" [*] Load SUCCESS")
+        else:
+            print(" [!] Load failed...")
+
+        # write html for visual comparison
+        index_path = os.path.join(self.result_dir, 'index.html')
+        index = open(index_path, 'w')
+        index.write("<html><body><table><tr>")
+        index.write("<th>name</th><th>input</th><th>output</th></tr>")
+
+        for sample_file in test_A_files:  # A -> B
+            print('Processing A image: ' + sample_file)
+            sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
+
+            image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
+
+            fake_img = self.sess.run(self.guide_fake_image, feed_dict={self.content_image: sample_image, self.style_image : style_file})
+            save_images(fake_img, [1, 1], image_path)
+            index.write("<td>%s</td>" % os.path.basename(image_path))
+            index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
+                    '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+            index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
+                    '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+            index.write("</tr>")
+
         index.close()
