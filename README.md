@@ -25,7 +25,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
            ├── ccc.jpg 
            ├── ddd.png
            └── ...
-├── guide.jpg
+├── guide.jpg (example for guided image translation task)
 ```
 ### Train
 * python main.py --phase train --dataset summer2winter --batch_size 1
