@@ -61,7 +61,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 * [UNIT-Tensorflow](https://github.com/taki0112/UNIT-Tensorflow)
 
 ## Reference
-* [MUNIT-Pytorch](https://github.com/NVlabs/MUNIT)
+* [MUNIT-Pytorch](https://github.com/NVlabs/MUNIT) (Author implementation)
 
 ## Author
 Junho Kim
