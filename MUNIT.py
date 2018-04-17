@@ -208,7 +208,6 @@ class MUNIT(object) :
 
         return x_ab
 
-
     def discriminate_real(self, x_A, x_B):
         real_A_logit = self.discriminator(x_A, scope="discriminator_A")
         real_B_logit = self.discriminator(x_B, scope="discriminator_B")
@@ -234,7 +233,6 @@ class MUNIT(object) :
         trainB = trainB.prefetch(self.batch_size).shuffle(self.all_dataset).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
 
         trainA_iterator = trainA.make_one_shot_iterator()
-
         trainB_iterator = trainB.make_one_shot_iterator()
 
 
@@ -333,7 +331,6 @@ class MUNIT(object) :
         self.G_loss = tf.summary.merge([self.G_A_loss, self.G_B_loss, self.all_G_loss])
         self.D_loss = tf.summary.merge([self.D_A_loss, self.D_B_loss, self.all_D_loss])
 
-
         """ Image """
         self.fake_A = x_ba
         self.fake_B = x_ab
@@ -363,7 +360,6 @@ class MUNIT(object) :
             guide_content_B, guide_style_B = self.Encoder_B(self.content_image, reuse=True)
             guide_content_A, guide_style_A = self.Encoder_A(self.style_image, reuse=True)
 
-
         self.guide_fake_A = self.Decoder_A(content_B=guide_content_B, style_A=guide_style_A, reuse=True)
         self.guide_fake_B = self.Decoder_B(content_A=guide_content_A, style_B=guide_style_B, reuse=True)
 
@@ -376,7 +372,6 @@ class MUNIT(object) :
 
         # summary writer
         self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_dir, self.sess.graph)
-
 
         # restore check-point if it exits
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
