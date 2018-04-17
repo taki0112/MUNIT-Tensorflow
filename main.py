@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
     parser.add_argument('--save_freq', type=int, default=1000, help='The number of ckpt_save_freq')
     parser.add_argument('--num_style', type=int, default=3, help='number of styles to sample')
+    parser.add_argument('--direction', type=str, default='a2b', help='direction of style guided image translation')
     parser.add_argument('--guide_img', type=str, default='guide.jpg', help='Style guided image translation')
 
     parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate')
