@@ -241,8 +241,8 @@ class MUNIT(object) :
 
 
         """ Define Encoder, Generator, Discriminator """
-        style_a = tf.random_normal(shape=[self.batch_size, 1, 1, self.style_dim], mean=0.0, stddev=1.0, dtype=tf.float32)
-        style_b = tf.random_normal(shape=[self.batch_size, 1, 1, self.style_dim], mean=0.0, stddev=1.0, dtype=tf.float32)
+        self.style_a = tf.placeholder(tf.float32, shape=[self.batch_size, 1, 1, self.style_dim], name='style_a')
+        self.style_b = tf.placeholder(tf.float32, shape=[self.batch_size, 1, 1, self.style_dim], name='style_b')
 
         # encode
         content_a, style_a_prime = self.Encoder_A(self.domain_A)
@@ -253,8 +253,8 @@ class MUNIT(object) :
         x_bb = self.Decoder_B(content_A=content_b, style_B=style_b_prime)
 
         # decode (cross domain)
-        x_ba = self.Decoder_A(content_B=content_b, style_A=style_a, reuse=True)
-        x_ab = self.Decoder_B(content_A=content_a, style_B=style_b, reuse=True)
+        x_ba = self.Decoder_A(content_B=content_b, style_A=self.style_a, reuse=True)
+        x_ab = self.Decoder_B(content_A=content_a, style_B=self.style_b, reuse=True)
 
         # encode again
         content_b_, style_a_ = self.Encoder_A(x_ba, reuse=True)
@@ -286,8 +286,8 @@ class MUNIT(object) :
         recon_A = L1_loss(x_aa, self.domain_A) # reconstruction
         recon_B = L1_loss(x_bb, self.domain_B) # reconstruction
 
-        recon_style_A = L1_loss(style_a_, style_a)
-        recon_style_B = L1_loss(style_b_, style_b)
+        recon_style_A = L1_loss(style_a_, self.style_a)
+        recon_style_B = L1_loss(style_b_, self.style_b)
 
         recon_content_A = L1_loss(content_a_, content_a)
         recon_content_B = L1_loss(content_b_, content_b)
@@ -382,7 +382,11 @@ class MUNIT(object) :
                 lr = lr / 2
 
             for idx in range(start_batch_id, self.iteration):
+                style_a = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
+                style_b = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
                 train_feed_dict = {
+                    self.style_a : style_a,
+                    self.style_b : style_b,
                     self.lr : lr
                 }
 
