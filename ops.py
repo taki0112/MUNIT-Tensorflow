@@ -68,12 +68,8 @@ def adaptive_resblock(x_init, channels, mu, sigma, use_bias=True, scope='adaptiv
 
 
 def adaptive_avg_pooling(x):
-    """
-    Incoming Tensor shape must be 4-D
-    """
-    _, _, _, c = x.get_shape().as_list()
-    gap = tf.reduce_mean(x, axis=[1, 2])
-    gap = tf.reshape(gap, shape=[-1, 1, 1, c])
+    # global average pooling
+    gap = tf.reduce_mean(x, axis=[1, 2], keep_dims=True)
 
     return gap
 

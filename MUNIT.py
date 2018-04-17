@@ -101,7 +101,7 @@ class MUNIT(object) :
             for i in range(2) :
                 x = conv(x, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='down_conv_'+str(i))
 
-            x = adaptive_avg_pooling(x)
+            x = adaptive_avg_pooling(x) # global average pooling
             x = conv(x, self.style_dim, kernel=1, stride=1, scope='SE_logit')
 
             return x
