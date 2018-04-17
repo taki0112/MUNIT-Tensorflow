@@ -128,24 +128,40 @@ For LSGAN, multiply each of G and D by 0.5.
 However, MUNIT authors did not do this.
 
 """
-def discriminator_loss(real, fake):
+def discriminator_loss(type, real, fake):
     n_scale = len(real)
     loss = []
 
+    real_loss = 0
+    fake_loss = 0
+
     for i in range(n_scale) :
-        real_loss = tf.reduce_mean(tf.squared_difference(real[i], 1.0))
-        fake_loss = tf.reduce_mean(tf.square(fake[i]))
+        if type == 'lsgan' :
+            real_loss = tf.reduce_mean(tf.squared_difference(real[i], 1.0))
+            fake_loss = tf.reduce_mean(tf.square(fake[i]))
+
+        if type == 'gan' :
+            real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real[i]), logits=real[i]))
+            fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(fake[i]), logits=fake[i]))
+
         loss.append(real_loss + fake_loss)
 
     return sum(loss)
 
 
-def generator_loss(fake):
+def generator_loss(type, fake):
     n_scale = len(fake)
     loss = []
 
+    fake_loss = 0
+
     for i in range(n_scale) :
-        fake_loss = tf.reduce_mean(tf.squared_difference(fake[i], 1.0))
+        if type == 'lsgan' :
+            fake_loss = tf.reduce_mean(tf.squared_difference(fake[i], 1.0))
+
+        if type == 'gan' :
+            fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(fake[i]), logits=fake[i]))
+
         loss.append(fake_loss)
 
 

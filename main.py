@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument('--direction', type=str, default='a2b', help='direction of style guided image translation')
     parser.add_argument('--guide_img', type=str, default='guide.jpg', help='Style guided image translation')
 
+    parser.add_argument('--gan_type', type=str, default='lsgan', help='GAN loss type [gan / lsgan]')
+
     parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate')
     parser.add_argument('--gan_w', type=float, default=1.0, help='weight of adversarial loss')
     parser.add_argument('--recon_x_w', type=float, default=10.0, help='weight of image reconstruction loss')

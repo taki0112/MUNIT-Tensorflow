@@ -17,6 +17,8 @@ class MUNIT(object) :
         self.epoch = args.epoch
         self.iteration = args.iteration
 
+        self.gan_type = args.gan_type
+
         self.batch_size = args.batch_size
         self.print_freq = args.print_freq
         self.save_freq = args.save_freq
@@ -57,6 +59,7 @@ class MUNIT(object) :
         self.all_dataset = max(len(self.trainA_dataset), len(self.trainB_dataset))
 
         print("##### Information #####")
+        print("# gan type : ", self.gan_type)
         print("# dataset : ", self.all_dataset)
         print("# batch_size : ", self.batch_size)
         print("# epoch : ", self.epoch)
@@ -276,11 +279,11 @@ class MUNIT(object) :
         fake_A_logit, fake_B_logit = self.discriminate_fake(x_ba, x_ab)
 
         """ Define Loss """
-        G_ad_loss_a = generator_loss(fake_A_logit)
-        G_ad_loss_b = generator_loss(fake_B_logit)
+        G_ad_loss_a = generator_loss(self.gan_type, fake_A_logit)
+        G_ad_loss_b = generator_loss(self.gan_type, fake_B_logit)
 
-        D_ad_loss_a = discriminator_loss(real_A_logit, fake_A_logit)
-        D_ad_loss_b = discriminator_loss(real_B_logit, fake_B_logit)
+        D_ad_loss_a = discriminator_loss(self.gan_type, real_A_logit, fake_A_logit)
+        D_ad_loss_b = discriminator_loss(self.gan_type, real_B_logit, fake_B_logit)
 
         recon_A = L1_loss(x_aa, self.domain_A) # reconstruction
         recon_B = L1_loss(x_bb, self.domain_B) # reconstruction
@@ -437,7 +440,7 @@ class MUNIT(object) :
 
     @property
     def model_dir(self):
-        return "{}_{}".format(self.model_name, self.dataset_name)
+        return "{}_{}_{}".format(self.model_name, self.dataset_name, self.gan_type)
 
     def save(self, checkpoint_dir, step):
         checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
