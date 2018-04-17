@@ -30,7 +30,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 * python main.py --phase train --dataset summer2winter
 
 ### Test
-* python main.py --phase test --dataset summer2winter --num_style 3
+* python main.py --phase test --dataset summer2winter --num_style 3 --batch_size 1
 
 ## Summary
 ![illustration](./assests/method_illustration.png)
