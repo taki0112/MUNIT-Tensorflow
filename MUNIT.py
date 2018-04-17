@@ -423,11 +423,11 @@ class MUNIT(object) :
                 if np.mod(idx+1, self.print_freq) == 0 :
                     save_images(batch_A_images, [self.batch_size, 1],
                                 './{}/real_A_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
-                    # save_images(batch_B_images, [self.batch_size, 1],
-                    #             './{}/real_B_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
+                    save_images(batch_B_images, [self.batch_size, 1],
+                                './{}/real_B_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
 
-                    # save_images(fake_A, [self.batch_size, 1],
-                    #             './{}/fake_A_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
+                    save_images(fake_A, [self.batch_size, 1],
+                                './{}/fake_A_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
                     save_images(fake_B, [self.batch_size, 1],
                                 './{}/fake_B_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
 
