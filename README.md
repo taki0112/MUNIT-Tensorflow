@@ -33,7 +33,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 * python main.py --phase test --dataset summer2winter --num_style 3 --batch_size 1
 
 ### Guided Image Translation
-* python main.py --phase guide --dataset summer2winter --batch_size 1 --guide_img ./guide.jpg
+* python main.py --phase guide --dataset summer2winter --batch_size 1 --direction a2b --guide_img guide.jpg
 
 ## Summary
 ![illustration](./assests/method_illustration.png)
