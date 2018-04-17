@@ -480,7 +480,7 @@ class MUNIT(object) :
             file_extension = os.path.basename(sample_file).split(".")[1]
 
             for i in range(self.num_style) :
-                test_style = tf.random_normal(shape=[1, 1, 1, self.style_dim], mean=0.0, stddev=1.0, dtype=tf.float32)
+                test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
                 image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
 
                 fake_img = self.sess.run(self.test_fake_B, feed_dict = {self.test_image : sample_image, self.test_style : test_style})
@@ -499,7 +499,7 @@ class MUNIT(object) :
             file_extension = os.path.basename(sample_file).split(".")[1]
 
             for i in range(self.num_style):
-                test_style = tf.random_normal(shape=[1, 1, 1, self.style_dim], mean=0.0, stddev=1.0, dtype=tf.float32)
+                test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
                 image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
 
                 fake_img = self.sess.run(self.test_fake_A, feed_dict={self.test_image: sample_image, self.test_style: test_style})
