@@ -57,6 +57,8 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 ### Yosemite Summer to Winter Translation (HD)
 ![summer2winter_yosemite](./assests/summer2winter_yosemite.jpg)
 
+### Example-guided Image Translation
+![guide](./assests/guide.jpg)
 
 ## Related works
 * [CycleGAN-Tensorflow](https://github.com/taki0112/CycleGAN-Tensorflow)
