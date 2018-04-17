@@ -60,7 +60,8 @@ class MUNIT(object) :
 
         print("##### Information #####")
         print("# gan type : ", self.gan_type)
-        print("# dataset : ", self.all_dataset)
+        print("# dataset : ", self.dataset_name)
+        print("# max dataset number : ", self.all_dataset)
         print("# batch_size : ", self.batch_size)
         print("# epoch : ", self.epoch)
         print("# iteration per epoch : ", self.iteration)
