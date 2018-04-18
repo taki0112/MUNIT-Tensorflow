@@ -10,7 +10,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 * Author uses LSGAN, but do not multiply each of G and D by 0.5
 
 ## Usage
-```bash
+```
 ├── dataset
    └── YOUR_DATASET_NAME
        ├── trainA
@@ -32,6 +32,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
            
 ├── guide.jpg (example for guided image translation task)
 ```
+
 ### Train
 * python main.py --phase train --dataset summer2winter --batch_size 1
 
