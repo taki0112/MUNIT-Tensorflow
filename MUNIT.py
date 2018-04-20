@@ -173,7 +173,7 @@ class MUNIT(object) :
         with tf.variable_scope(scope, reuse=reuse) :
             for scale in range(self.n_scale) :
                 channel = self.ch
-                x = conv(x_init, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) +'conv_0')
+                x = conv(x_init, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) + 'conv_0')
 
                 for i in range(1, self.n_dis):
                     x = conv(x, channel * 2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) +'conv_' + str(i))
@@ -181,7 +181,7 @@ class MUNIT(object) :
 
                     channel = channel * 2
 
-                x = conv(x, channels=1, kernel=1, stride=1, scope='ms_' + str(scale) +'D_logit')
+                x = conv(x, channels=1, kernel=1, stride=1, scope='ms_' + str(scale) + 'D_logit')
                 D_logit.append(x)
 
                 x_init = down_sample(x_init)

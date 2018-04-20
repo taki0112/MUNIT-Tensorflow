@@ -20,27 +20,6 @@ class ImageData:
 
         return img
 
-def prepare_data(dataset_name, size):
-    data_path = os.path.join("./dataset", dataset_name)
-
-    trainA = []
-    trainB = []
-    for path, dir, files in os.walk(data_path):
-        for file in files:
-            image = os.path.join(path, file)
-            if path.__contains__('trainA') :
-                trainA.append(misc.imresize(misc.imread(image, mode='RGB'), [size, size]))
-            if path.__contains__('trainB') :
-                trainB.append(misc.imresize(misc.imread(image, mode='RGB'), [size, size]))
-
-
-    trainA = preprocessing(np.asarray(trainA))
-    trainB = preprocessing(np.asarray(trainB))
-
-    np.random.shuffle(trainA)
-    np.random.shuffle(trainB)
-
-    return trainA, trainB
 
 def load_test_data(image_path, size=256):
     img = misc.imread(image_path, mode='RGB')
