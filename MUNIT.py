@@ -13,6 +13,7 @@ class MUNIT(object) :
         self.log_dir = args.log_dir
         self.sample_dir = args.sample_dir
         self.dataset_name = args.dataset
+        self.augment_flag = args.augment_flag
 
         self.epoch = args.epoch
         self.iteration = args.iteration
@@ -231,7 +232,7 @@ class MUNIT(object) :
         self.lr = tf.placeholder(tf.float32, name='learning_rate')
 
         """ Input Image"""
-        Image_Data_Class = ImageData(self.img_size, self.img_ch)
+        Image_Data_Class = ImageData(self.img_size, self.img_ch, self.augment_flag)
 
         trainA = tf.data.Dataset.from_tensor_slices(self.trainA_dataset)
         trainB = tf.data.Dataset.from_tensor_slices(self.trainB_dataset)
