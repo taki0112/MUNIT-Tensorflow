@@ -4,6 +4,9 @@ import tensorflow.contrib as tf_contrib
 weight_init = tf_contrib.layers.variance_scaling_initializer() # kaming init for encoder / decoder
 weight_regularizer = tf_contrib.layers.l2_regularizer(scale=0.0001)
 
+##################################################################################
+# Layer
+##################################################################################
 
 def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, scope='conv'):
     with tf.variable_scope(scope):
@@ -31,14 +34,12 @@ def linear(x, units, use_bias=True, scope='linear'):
 
         return x
 
-def down_sample(x) :
-    return tf.layers.average_pooling2d(x, pool_size=3, strides=2, padding='SAME')
+def flatten(x) :
+    return tf.layers.flatten(x)
 
-def up_sample(x, scale_factor=2):
-    _, h, w, _ = x.get_shape().as_list()
-    new_size = [scale_factor * h, scale_factor * w]
-    return tf.image.resize_nearest_neighbor(x, size=new_size)
-
+##################################################################################
+# Residual-block
+##################################################################################
 
 def resblock(x_init, channels, use_bias=True, scope='resblock'):
     with tf.variable_scope(scope):
@@ -57,15 +58,26 @@ def adaptive_resblock(x_init, channels, mu, sigma, use_bias=True, scope='adaptiv
     with tf.variable_scope(scope):
         with tf.variable_scope('res1'):
             x = conv(x_init, channels, kernel=3, stride=1, pad=1, pad_type='reflect', use_bias=use_bias)
-            x = adain(x, mu, sigma)
+            x = adaptive_instance_norm(x, mu, sigma)
             x = relu(x)
 
         with tf.variable_scope('res2'):
             x = conv(x, channels, kernel=3, stride=1, pad=1, pad_type='reflect', use_bias=use_bias)
-            x = adain(x, mu, sigma)
+            x = adaptive_instance_norm(x, mu, sigma)
 
         return x + x_init
 
+##################################################################################
+# Sampling
+##################################################################################
+
+def down_sample(x) :
+    return tf.layers.average_pooling2d(x, pool_size=3, strides=2, padding='SAME')
+
+def up_sample(x, scale_factor=2):
+    _, h, w, _ = x.get_shape().as_list()
+    new_size = [h * scale_factor, w * scale_factor]
+    return tf.image.resize_nearest_neighbor(x, size=new_size)
 
 def adaptive_avg_pooling(x):
     # global average pooling
@@ -73,11 +85,9 @@ def adaptive_avg_pooling(x):
 
     return gap
 
-
-def flatten(x) :
-    return tf.layers.flatten(x)
-
-
+##################################################################################
+# Activation function
+##################################################################################
 
 def lrelu(x, alpha=0.01):
     # pytorch alpha is 0.01
@@ -91,7 +101,11 @@ def relu(x):
 def tanh(x):
     return tf.tanh(x)
 
-def adain(content, gamma, beta, epsilon=1e-5):
+##################################################################################
+# Normalization function
+##################################################################################
+
+def adaptive_instance_norm(content, gamma, beta, epsilon=1e-5):
     # gamma, beta = style_mean, style_std from MLP
 
     c_mean, c_var = tf.nn.moments(content, axes=[1, 2], keep_dims=True)
@@ -111,19 +125,18 @@ def layer_norm(x, scope='layer_norm') :
                                         center=True, scale=True,
                                         scope=scope)
 
-def L1_loss(x, y):
-    loss = tf.reduce_mean(tf.abs(x - y))
-
-    return loss
+##################################################################################
+# Loss function
+##################################################################################
 
 """
 
 Author use LSGAN
-
 For LSGAN, multiply each of G and D by 0.5.
 However, MUNIT authors did not do this.
 
 """
+
 def discriminator_loss(type, real, fake):
     n_scale = len(real)
     loss = []
@@ -163,3 +176,8 @@ def generator_loss(type, fake):
 
     return sum(loss)
 
+
+def L1_loss(x, y):
+    loss = tf.reduce_mean(tf.abs(x - y))
+
+    return loss

@@ -41,7 +41,7 @@ class MUNIT(object) :
 
         """ Generator """
         self.n_res = args.n_res
-        self.mlp_dim = args.mlp_dim
+        self.mlp_dim = pow(2, args.n_sample) * args.ch # default : 256
 
         self.n_downsample = args.n_sample
         self.n_upsample = args.n_sample
@@ -83,7 +83,7 @@ class MUNIT(object) :
         print("# Multi-scale Dis : ", self.n_scale)
 
     ##################################################################################
-    # Encoder and Decoders
+    # Style & Content
     ##################################################################################
 
     def Style_Encoder(self, x, reuse=False, scope='style_encoder'):
@@ -135,6 +135,7 @@ class MUNIT(object) :
                 x = adaptive_resblock(x, channel, mu, sigma, scope='adaptive_resblock'+str(i))
 
             for i in range(self.n_upsample) :
+                # # IN removes the original feature mean and variance that represent important style information
                 x = up_sample(x, scale_factor=2)
                 x = conv(x, channel//2, kernel=5, stride=1, pad=2, pad_type='reflect', scope='conv_'+str(i))
                 x = layer_norm(x, scope='layer_norm_'+str(i))
@@ -142,7 +143,7 @@ class MUNIT(object) :
 
                 channel = channel // 2
 
-            x = conv(x, channels=3, kernel=7, stride=1, pad=3, pad_type='reflect', scope='G_logit')
+            x = conv(x, channels=self.img_ch, kernel=7, stride=1, pad=3, pad_type='reflect', scope='G_logit')
             x = tanh(x)
 
             return x
@@ -187,6 +188,10 @@ class MUNIT(object) :
                 x_init = down_sample(x_init)
 
             return D_logit
+
+    ##################################################################################
+    # Encoder and Decoders
+    ##################################################################################
 
     def Encoder_A(self, x_A, reuse=False):
         style_A = self.Style_Encoder(x_A, reuse=reuse, scope='style_encoder_A')
@@ -287,9 +292,13 @@ class MUNIT(object) :
         recon_A = L1_loss(x_aa, self.domain_A) # reconstruction
         recon_B = L1_loss(x_bb, self.domain_B) # reconstruction
 
+        # The style reconstruction loss encourages
+        # diverse outputs given different style codes
         recon_style_A = L1_loss(style_a_, self.style_a)
         recon_style_B = L1_loss(style_b_, self.style_b)
 
+        # The content reconstruction loss encourages
+        # the translated image to preserve semantic content of the input image
         recon_content_A = L1_loss(content_a_, content_a)
         recon_content_B = L1_loss(content_b_, content_b)
 
@@ -392,11 +401,12 @@ class MUNIT(object) :
         lr = self.init_lr
         for epoch in range(start_epoch, self.epoch):
             if epoch > 0 :
-                lr = lr / 2
+                lr = lr * 0.5
 
             for idx in range(start_batch_id, self.iteration):
                 style_a = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
                 style_b = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
+
                 train_feed_dict = {
                     self.style_a : style_a,
                     self.style_b : style_b,
@@ -498,6 +508,7 @@ class MUNIT(object) :
 
                 fake_img = self.sess.run(self.test_fake_B, feed_dict = {self.test_image : sample_image, self.test_style : test_style})
                 save_images(fake_img, [1, 1], image_path)
+
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
                     '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
@@ -517,6 +528,7 @@ class MUNIT(object) :
 
                 fake_img = self.sess.run(self.test_fake_A, feed_dict={self.test_image: sample_image, self.test_style: test_style})
                 save_images(fake_img, [1, 1], image_path)
+
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
                         '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
@@ -552,11 +564,11 @@ class MUNIT(object) :
             for sample_file in test_A_files:  # A -> B
                 print('Processing A image: ' + sample_file)
                 sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
-
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
                 fake_img = self.sess.run(self.guide_fake_B, feed_dict={self.content_image: sample_image, self.style_image : style_file})
                 save_images(fake_img, [1, 1], image_path)
+
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
                         '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
@@ -568,11 +580,11 @@ class MUNIT(object) :
             for sample_file in test_B_files:  # B -> A
                 print('Processing B image: ' + sample_file)
                 sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
-
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
                 fake_img = self.sess.run(self.guide_fake_A, feed_dict={self.content_image: sample_image, self.style_image : style_file})
                 save_images(fake_img, [1, 1], image_path)
+
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
                         '../..' + os.path.sep + sample_file), self.img_size, self.img_size))

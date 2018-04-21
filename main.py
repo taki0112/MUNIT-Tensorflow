@@ -28,7 +28,6 @@ def parse_args():
     parser.add_argument('--recon_x_cyc_w', type=float, default=0.0, help='weight of explicit style augmented cycle consistency loss')
 
     parser.add_argument('--ch', type=int, default=64, help='base channel number per layer')
-    parser.add_argument('--mlp_dim', type=int, default=256, help='number of filters in MLP')
     parser.add_argument('--style_dim', type=int, default=8, help='length of style code')
     parser.add_argument('--n_sample', type=int, default=2, help='number of sampling layers in content encoder')
     parser.add_argument('--n_res', type=int, default=4, help='number of residual blocks in content encoder/decoder')
