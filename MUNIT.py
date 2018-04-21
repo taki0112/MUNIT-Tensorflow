@@ -83,7 +83,7 @@ class MUNIT(object) :
         print("# Multi-scale Dis : ", self.n_scale)
 
     ##################################################################################
-    # Style & Content
+    # Encoder and Decoders
     ##################################################################################
 
     def Style_Encoder(self, x, reuse=False, scope='style_encoder'):
@@ -190,7 +190,7 @@ class MUNIT(object) :
             return D_logit
 
     ##################################################################################
-    # Encoder and Decoders
+    # Model
     ##################################################################################
 
     def Encoder_A(self, x_A, reuse=False):
