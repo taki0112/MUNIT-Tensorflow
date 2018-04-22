@@ -399,10 +399,9 @@ class MUNIT(object) :
 
         # loop for epoch
         start_time = time.time()
-        lr = self.init_lr
         for epoch in range(start_epoch, self.epoch):
             if epoch > 0 :
-                lr = lr * 0.5
+                lr = self.init_lr * pow(0.5, epoch)
 
             for idx in range(start_batch_id, self.iteration):
                 style_a = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
