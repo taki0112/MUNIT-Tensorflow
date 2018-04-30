@@ -4,8 +4,7 @@ from glob import glob
 import time
 from tensorflow.contrib.data import batch_and_drop_remainder
 
-
-class MUNIT(object):
+class MUNIT(object) :
     def __init__(self, sess, args):
         self.model_name = 'MUNIT'
         self.sess = sess
@@ -24,7 +23,7 @@ class MUNIT(object):
         self.batch_size = args.batch_size
         self.print_freq = args.print_freq
         self.save_freq = args.save_freq
-        self.num_style = args.num_style  # for test
+        self.num_style = args.num_style # for test
         self.guide_img = args.guide_img
         self.direction = args.direction
 
@@ -43,7 +42,7 @@ class MUNIT(object):
 
         """ Generator """
         self.n_res = args.n_res
-        self.mlp_dim = pow(2, args.n_sample) * args.ch  # default : 256
+        self.mlp_dim = pow(2, args.n_sample) * args.ch # default : 256
 
         self.n_downsample = args.n_sample
         self.n_upsample = args.n_sample
@@ -91,56 +90,56 @@ class MUNIT(object):
     def Style_Encoder(self, x, reuse=False, scope='style_encoder'):
         # IN removes the original feature mean and variance that represent important style information
         channel = self.ch
-        with tf.variable_scope(scope, reuse=reuse):
+        with tf.variable_scope(scope, reuse=reuse) :
             x = conv(x, channel, kernel=7, stride=1, pad=3, pad_type='reflect', scope='conv_0')
             x = relu(x)
 
-            for i in range(2):
-                x = conv(x, channel * 2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='conv_' + str(i + 1))
+            for i in range(2) :
+                x = conv(x, channel*2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='conv_'+str(i+1))
                 x = relu(x)
 
                 channel = channel * 2
 
-            for i in range(2):
-                x = conv(x, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='down_conv_' + str(i))
+            for i in range(2) :
+                x = conv(x, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='down_conv_'+str(i))
 
-            x = adaptive_avg_pooling(x)  # global average pooling
+            x = adaptive_avg_pooling(x) # global average pooling
             x = conv(x, self.style_dim, kernel=1, stride=1, scope='SE_logit')
 
             return x
 
     def Content_Encoder(self, x, reuse=False, scope='content_encoder'):
         channel = self.ch
-        with tf.variable_scope(scope, reuse=reuse):
+        with tf.variable_scope(scope, reuse=reuse) :
             x = conv(x, channel, kernel=7, stride=1, pad=3, pad_type='reflect', scope='conv_0')
             x = instance_norm(x, scope='ins_0')
             x = relu(x)
 
-            for i in range(self.n_downsample):
-                x = conv(x, channel * 2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='conv_' + str(i + 1))
-                x = instance_norm(x, scope='ins_' + str(i + 1))
+            for i in range(self.n_downsample) :
+                x = conv(x, channel*2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='conv_'+str(i+1))
+                x = instance_norm(x, scope='ins_'+str(i+1))
                 x = relu(x)
 
                 channel = channel * 2
 
-            for i in range(self.n_res):
-                x = resblock(x, channel, scope='resblock_' + str(i))
+            for i in range(self.n_res) :
+                x = resblock(x, channel, scope='resblock_'+str(i))
 
             return x
 
     def generator(self, contents, style, reuse=False, scope="decoder"):
         channel = self.mlp_dim
-        with tf.variable_scope(scope, reuse=reuse):
+        with tf.variable_scope(scope, reuse=reuse) :
             mu, sigma = self.MLP(style, reuse)
             x = contents
-            for i in range(self.n_res):
-                x = adaptive_resblock(x, channel, mu, sigma, scope='adaptive_resblock' + str(i))
+            for i in range(self.n_res) :
+                x = adaptive_resblock(x, channel, mu, sigma, scope='adaptive_resblock'+str(i))
 
-            for i in range(self.n_upsample):
+            for i in range(self.n_upsample) :
                 # # IN removes the original feature mean and variance that represent important style information
                 x = up_sample(x, scale_factor=2)
-                x = conv(x, channel // 2, kernel=5, stride=1, pad=2, pad_type='reflect', scope='conv_' + str(i))
-                x = layer_norm(x, scope='layer_norm_' + str(i))
+                x = conv(x, channel//2, kernel=5, stride=1, pad=2, pad_type='reflect', scope='conv_'+str(i))
+                x = layer_norm(x, scope='layer_norm_'+str(i))
                 x = relu(x)
 
                 channel = channel // 2
@@ -152,7 +151,7 @@ class MUNIT(object):
 
     def MLP(self, style, reuse=False, scope='MLP'):
         channel = self.mlp_dim
-        with tf.variable_scope(scope, reuse=reuse):
+        with tf.variable_scope(scope, reuse=reuse) :
             x = linear(style, channel, scope='linear_0')
             x = relu(x)
 
@@ -173,13 +172,14 @@ class MUNIT(object):
 
     def discriminator(self, x_init, reuse=False, scope="discriminator"):
         D_logit = []
-        with tf.variable_scope(scope, reuse=reuse):
-            for scale in range(self.n_scale):
+        with tf.variable_scope(scope, reuse=reuse) :
+            for scale in range(self.n_scale) :
                 channel = self.ch
                 x = conv(x_init, channel, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) + 'conv_0')
+                x = lrelu(x, 0.2)
 
                 for i in range(1, self.n_dis):
-                    x = conv(x, channel * 2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) + 'conv_' + str(i))
+                    x = conv(x, channel * 2, kernel=4, stride=2, pad=1, pad_type='reflect', scope='ms_' + str(scale) +'conv_' + str(i))
                     x = lrelu(x, 0.2)
 
                     channel = channel * 2
@@ -238,16 +238,16 @@ class MUNIT(object):
         trainA = tf.data.Dataset.from_tensor_slices(self.trainA_dataset)
         trainB = tf.data.Dataset.from_tensor_slices(self.trainB_dataset)
 
-        trainA = trainA.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(
-            batch_and_drop_remainder(self.batch_size)).repeat()
-        trainB = trainB.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(
-            batch_and_drop_remainder(self.batch_size)).repeat()
+        trainA = trainA.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
+        trainB = trainB.prefetch(self.batch_size).shuffle(self.dataset_num).map(Image_Data_Class.image_processing, num_parallel_calls=8).apply(batch_and_drop_remainder(self.batch_size)).repeat()
 
         trainA_iterator = trainA.make_one_shot_iterator()
         trainB_iterator = trainB.make_one_shot_iterator()
 
+
         self.domain_A = trainA_iterator.get_next()
         self.domain_B = trainB_iterator.get_next()
+
 
         """ Define Encoder, Generator, Discriminator """
         self.style_a = tf.placeholder(tf.float32, shape=[self.batch_size, 1, 1, self.style_dim], name='style_a')
@@ -270,14 +270,14 @@ class MUNIT(object):
         content_a_, style_b_ = self.Encoder_B(x_ab, reuse=True)
 
         # decode again (if needed)
-        if self.recon_x_cyc_w > 0:
+        if self.recon_x_cyc_w > 0 :
             x_aba = self.Decoder_A(content_B=content_a_, style_A=style_a_prime, reuse=True)
             x_bab = self.Decoder_B(content_A=content_b_, style_B=style_b_prime, reuse=True)
 
             cyc_recon_A = L1_loss(x_aba, self.domain_A)
             cyc_recon_B = L1_loss(x_bab, self.domain_B)
 
-        else:
+        else :
             cyc_recon_A = 0.0
             cyc_recon_B = 0.0
 
@@ -291,8 +291,8 @@ class MUNIT(object):
         D_ad_loss_a = discriminator_loss(self.gan_type, real_A_logit, fake_A_logit)
         D_ad_loss_b = discriminator_loss(self.gan_type, real_B_logit, fake_B_logit)
 
-        recon_A = L1_loss(x_aa, self.domain_A)  # reconstruction
-        recon_B = L1_loss(x_bb, self.domain_B)  # reconstruction
+        recon_A = L1_loss(x_aa, self.domain_A) # reconstruction
+        recon_B = L1_loss(x_bb, self.domain_B) # reconstruction
 
         # The style reconstruction loss encourages
         # diverse outputs given different style codes
@@ -303,6 +303,7 @@ class MUNIT(object):
         # the translated image to preserve semantic content of the input image
         recon_content_A = L1_loss(content_a_, content_a)
         recon_content_B = L1_loss(content_b_, content_b)
+
 
         Generator_A_loss = self.gan_w * G_ad_loss_a + \
                            self.recon_x_w * recon_A + \
@@ -326,6 +327,7 @@ class MUNIT(object):
         t_vars = tf.trainable_variables()
         G_vars = [var for var in t_vars if 'decoder' in var.name or 'encoder' in var.name]
         D_vars = [var for var in t_vars if 'discriminator' in var.name]
+
 
         self.G_optim = tf.train.AdamOptimizer(self.lr, beta1=0.5, beta2=0.999).minimize(self.Generator_loss, var_list=G_vars)
         self.D_optim = tf.train.AdamOptimizer(self.lr, beta1=0.5, beta2=0.999).minimize(self.Discriminator_loss, var_list=D_vars)
@@ -362,11 +364,11 @@ class MUNIT(object):
         self.content_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='content_image')
         self.style_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='guide_style_image')
 
-        if self.direction == 'a2b':
+        if self.direction == 'a2b' :
             guide_content_A, guide_style_A = self.Encoder_A(self.content_image, reuse=True)
             guide_content_B, guide_style_B = self.Encoder_B(self.style_image, reuse=True)
 
-        else:
+        else :
             guide_content_B, guide_style_B = self.Encoder_B(self.content_image, reuse=True)
             guide_content_A, guide_style_A = self.Encoder_A(self.style_image, reuse=True)
 
@@ -407,18 +409,17 @@ class MUNIT(object):
                 style_b = np.random.normal(loc=0.0, scale=1.0, size=[self.batch_size, 1, 1, self.style_dim])
 
                 train_feed_dict = {
-                    self.style_a: style_a,
-                    self.style_b: style_b,
-                    self.lr: lr
+                    self.style_a : style_a,
+                    self.style_b : style_b,
+                    self.lr : lr
                 }
 
                 # Update D
-                _, d_loss, summary_str = self.sess.run([self.D_optim, self.Discriminator_loss, self.D_loss], feed_dict=train_feed_dict)
+                _, d_loss, summary_str = self.sess.run([self.D_optim, self.Discriminator_loss, self.D_loss], feed_dict = train_feed_dict)
                 self.writer.add_summary(summary_str, counter)
 
                 # Update G
-                batch_A_images, batch_B_images, fake_A, fake_B, _, g_loss, summary_str = self.sess.run(
-                    [self.real_A, self.real_B, self.fake_A, self.fake_B, self.G_optim, self.Generator_loss, self.G_loss], feed_dict=train_feed_dict)
+                batch_A_images, batch_B_images, fake_A, fake_B, _, g_loss, summary_str = self.sess.run([self.real_A, self.real_B, self.fake_A, self.fake_B, self.G_optim, self.Generator_loss, self.G_loss], feed_dict = train_feed_dict)
                 self.writer.add_summary(summary_str, counter)
 
                 # display training status
@@ -426,18 +427,18 @@ class MUNIT(object):
                 print("Epoch: [%2d] [%6d/%6d] time: %4.4f d_loss: %.8f, g_loss: %.8f" \
                       % (epoch, idx, self.iteration, time.time() - start_time, d_loss, g_loss))
 
-                if np.mod(idx + 1, self.print_freq) == 0:
+                if np.mod(idx+1, self.print_freq) == 0 :
                     save_images(batch_A_images, [self.batch_size, 1],
-                                './{}/real_A_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx + 1))
+                                './{}/real_A_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
                     # save_images(batch_B_images, [self.batch_size, 1],
                     #             './{}/real_B_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
 
                     # save_images(fake_A, [self.batch_size, 1],
                     #             './{}/fake_A_{}_{:02d}_{:06d}.jpg'.format(self.sample_dir, gpu_id, epoch, idx+1))
                     save_images(fake_B, [self.batch_size, 1],
-                                './{}/fake_B_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx + 1))
+                                './{}/fake_B_{:02d}_{:06d}.jpg'.format(self.sample_dir, epoch, idx+1))
 
-                if np.mod(idx + 1, self.save_freq) == 0:
+                if np.mod(idx+1, self.save_freq) == 0 :
                     self.save(self.checkpoint_dir, counter)
 
             # After an epoch, start_batch_id is set to zero
@@ -485,9 +486,9 @@ class MUNIT(object):
         self.result_dir = os.path.join(self.result_dir, self.model_dir)
         check_folder(self.result_dir)
 
-        if could_load:
+        if could_load :
             print(" [*] Load SUCCESS")
-        else:
+        else :
             print(" [!] Load failed...")
 
         # write html for visual comparison
@@ -496,27 +497,27 @@ class MUNIT(object):
         index.write("<html><body><table><tr>")
         index.write("<th>name</th><th>input</th><th>output</th></tr>")
 
-        for sample_file in test_A_files:  # A -> B
+        for sample_file  in test_A_files : # A -> B
             print('Processing A image: ' + sample_file)
             sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
             file_name = os.path.basename(sample_file).split(".")[0]
             file_extension = os.path.basename(sample_file).split(".")[1]
 
-            for i in range(self.num_style):
+            for i in range(self.num_style) :
                 test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
                 image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
 
-                fake_img = self.sess.run(self.test_fake_B, feed_dict={self.test_image: sample_image, self.test_style: test_style})
+                fake_img = self.sess.run(self.test_fake_B, feed_dict = {self.test_image : sample_image, self.test_style : test_style})
                 save_images(fake_img, [1, 1], image_path)
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+                    '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+                    '../..' + os.path.sep + image_path), self.img_size, self.img_size))
                 index.write("</tr>")
 
-        for sample_file in test_B_files:  # B -> A
+        for sample_file  in test_B_files : # B -> A
             print('Processing B image: ' + sample_file)
             sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
             file_name = os.path.basename(sample_file).split(".")[0]
@@ -560,13 +561,13 @@ class MUNIT(object):
         index.write("<html><body><table><tr>")
         index.write("<th>name</th><th>input</th><th>output</th></tr>")
 
-        if self.direction == 'a2b':
+        if self.direction == 'a2b' :
             for sample_file in test_A_files:  # A -> B
                 print('Processing A image: ' + sample_file)
                 sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
-                fake_img = self.sess.run(self.guide_fake_B, feed_dict={self.content_image: sample_image, self.style_image: style_file})
+                fake_img = self.sess.run(self.guide_fake_B, feed_dict={self.content_image: sample_image, self.style_image : style_file})
                 save_images(fake_img, [1, 1], image_path)
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
@@ -576,13 +577,13 @@ class MUNIT(object):
                         '../..' + os.path.sep + image_path), self.img_size, self.img_size))
                 index.write("</tr>")
 
-        else:
+        else :
             for sample_file in test_B_files:  # B -> A
                 print('Processing B image: ' + sample_file)
                 sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
-                fake_img = self.sess.run(self.guide_fake_A, feed_dict={self.content_image: sample_image, self.style_image: style_file})
+                fake_img = self.sess.run(self.guide_fake_A, feed_dict={self.content_image: sample_image, self.style_image : style_file})
                 save_images(fake_img, [1, 1], image_path)
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
