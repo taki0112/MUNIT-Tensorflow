@@ -36,7 +36,8 @@ def parse_args():
     parser.add_argument('--n_dis', type=int, default=4, help='number of discriminator layer')
     parser.add_argument('--n_scale', type=int, default=3, help='number of scales')
 
-    parser.add_argument('--img_size', type=int, default=256, help='The size of image')
+    parser.add_argument('--img_h', type=int, default=256, help='The size of image hegiht')
+    parser.add_argument('--img_w', type=int, default=256, help='The size of image width')
     parser.add_argument('--img_ch', type=int, default=3, help='The size of image channel')
 
     parser.add_argument('--checkpoint_dir', type=str, default='checkpoint',

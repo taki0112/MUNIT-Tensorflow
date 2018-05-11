@@ -27,7 +27,8 @@ class MUNIT(object) :
         self.guide_img = args.guide_img
         self.direction = args.direction
 
-        self.img_size = args.img_size
+        self.img_h = args.img_h
+        self.img_w = args.img_w
         self.img_ch = args.img_ch
 
         self.init_lr = args.lr
@@ -234,7 +235,7 @@ class MUNIT(object) :
         self.lr = tf.placeholder(tf.float32, name='learning_rate')
 
         """ Input Image"""
-        Image_Data_Class = ImageData(self.img_size, self.img_ch, self.augment_flag)
+        Image_Data_Class = ImageData(self.img_h, self.img_w, self.img_ch, self.augment_flag)
 
         trainA = tf.data.Dataset.from_tensor_slices(self.trainA_dataset)
         trainB = tf.data.Dataset.from_tensor_slices(self.trainB_dataset)
@@ -352,7 +353,7 @@ class MUNIT(object) :
         self.real_B = self.domain_B
 
         """ Test """
-        self.test_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='test_image')
+        self.test_image = tf.placeholder(tf.float32, [1, self.img_h, self.img_w, self.img_ch], name='test_image')
         self.test_style = tf.placeholder(tf.float32, [1, 1, 1, self.style_dim], name='test_style')
 
         test_content_a, _ = self.Encoder_A(self.test_image, reuse=True)
@@ -362,8 +363,8 @@ class MUNIT(object) :
         self.test_fake_B = self.Decoder_B(content_A=test_content_a, style_B=self.test_style, reuse=True)
 
         """ Guided Image Translation """
-        self.content_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='content_image')
-        self.style_image = tf.placeholder(tf.float32, [1, self.img_size, self.img_size, self.img_ch], name='guide_style_image')
+        self.content_image = tf.placeholder(tf.float32, [1, self.img_h, self.img_w, self.img_ch], name='content_image')
+        self.style_image = tf.placeholder(tf.float32, [1, self.img_h, self.img_w, self.img_ch], name='guide_style_image')
 
         if self.direction == 'a2b' :
             guide_content_A, guide_style_A = self.Encoder_A(self.content_image, reuse=True)
@@ -500,7 +501,7 @@ class MUNIT(object) :
 
         for sample_file  in test_A_files : # A -> B
             print('Processing A image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
+            sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
             file_name = os.path.basename(sample_file).split(".")[0]
             file_extension = os.path.basename(sample_file).split(".")[1]
 
@@ -513,14 +514,14 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                    '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+                    '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                    '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+                    '../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
 
         for sample_file  in test_B_files : # B -> A
             print('Processing B image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
+            sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
             file_name = os.path.basename(sample_file).split(".")[0]
             file_extension = os.path.basename(sample_file).split(".")[1]
 
@@ -533,9 +534,9 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
         index.close()
 
@@ -544,7 +545,7 @@ class MUNIT(object) :
         test_A_files = glob('./dataset/{}/*.*'.format(self.dataset_name + '/testA'))
         test_B_files = glob('./dataset/{}/*.*'.format(self.dataset_name + '/testB'))
 
-        style_file = np.asarray(load_test_data(self.guide_img, size=self.img_size))
+        style_file = np.asarray(load_test_data(self.guide_img, size_h=self.img_h, size_w=self.img_w))
 
         self.saver = tf.train.Saver()
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
@@ -565,7 +566,7 @@ class MUNIT(object) :
         if self.direction == 'a2b' :
             for sample_file in test_A_files:  # A -> B
                 print('Processing A image: ' + sample_file)
-                sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
+                sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
                 fake_img = self.sess.run(self.guide_fake_B, feed_dict={self.content_image: sample_image, self.style_image : style_file})
@@ -573,15 +574,15 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
 
         else :
             for sample_file in test_B_files:  # B -> A
                 print('Processing B image: ' + sample_file)
-                sample_image = np.asarray(load_test_data(sample_file, size=self.img_size))
+                sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
                 image_path = os.path.join(self.result_dir, '{}'.format(os.path.basename(sample_file)))
 
                 fake_img = self.sess.run(self.guide_fake_A, feed_dict={self.content_image: sample_image, self.style_image : style_file})
@@ -589,8 +590,8 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_size, self.img_size))
+                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_size, self.img_size))
+                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
         index.close()

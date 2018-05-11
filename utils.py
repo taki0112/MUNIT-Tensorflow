@@ -6,32 +6,34 @@ import numpy as np
 
 # https://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/
 # https://people.eecs.berkeley.edu/~tinghuiz/projects/pix2pix/datasets/
+
 class ImageData:
 
-    def __init__(self, load_size, channels, augment_flag=False):
-        self.load_size = load_size
+    def __init__(self, img_h, img_w, channels, augment_flag=False):
+        self.img_h = img_h
+        self.img_w = img_w
         self.channels = channels
         self.augment_flag = augment_flag
 
     def image_processing(self, filename):
         x = tf.read_file(filename)
         x_decode = tf.image.decode_jpeg(x, channels=self.channels)
-        img = tf.image.resize_images(x_decode, [self.load_size, self.load_size])
+        img = tf.image.resize_images(x_decode, [self.img_h, self.img_w])
         img = tf.cast(img, tf.float32) / 127.5 - 1
 
         if self.augment_flag :
-            augment_size = self.load_size + (30 if self.load_size == 256 else 15)
+            augment_size_h = self.img_h + (30 if self.img_h == 256 else 15)
+            augment_size_w = self.img_w + (30 if self.img_w == 256 else 15)
             p = random.random()
             if p > 0.5:
-                img = augmentation(img, augment_size)
+                img = augmentation(img, augment_size_h, augment_size_w)
 
         return img
 
 
-
-def load_test_data(image_path, size=256):
+def load_test_data(image_path, size_h=256, size_w=256):
     img = misc.imread(image_path, mode='RGB')
-    img = misc.imresize(img, [size, size])
+    img = misc.imresize(img, [size_h, size_w])
     img = np.expand_dims(img, axis=0)
     img = preprocessing(img)
 
@@ -41,11 +43,11 @@ def preprocessing(x):
     x = x/127.5 - 1 # -1 ~ 1
     return x
 
-def augmentation(image, augment_size):
+def augmentation(image, aug_img_h, aug_img_w):
     seed = random.randint(0, 2 ** 31 - 1)
     ori_image_shape = tf.shape(image)
     image = tf.image.random_flip_left_right(image, seed=seed)
-    image = tf.image.resize_images(image, [augment_size, augment_size])
+    image = tf.image.resize_images(image, [aug_img_h, aug_img_w])
     image = tf.random_crop(image, ori_image_shape, seed=seed)
     return image
 
