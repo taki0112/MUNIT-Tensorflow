@@ -499,45 +499,47 @@ class MUNIT(object) :
         index.write("<html><body><table><tr>")
         index.write("<th>name</th><th>input</th><th>output</th></tr>")
 
-        for sample_file  in test_A_files : # A -> B
-            print('Processing A image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
-            file_name = os.path.basename(sample_file).split(".")[0]
-            file_extension = os.path.basename(sample_file).split(".")[1]
+        if self.direction != 'b2a':
+                for sample_file  in test_A_files : # A -> B
+                    print('Processing A image: ' + sample_file)
+                    sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
+                    file_name = os.path.basename(sample_file).split(".")[0]
+                    file_extension = os.path.basename(sample_file).split(".")[1]
 
-            for i in range(self.num_style) :
-                test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
-                image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
+                    for i in range(self.num_style) :
+                        test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
+                        image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
 
-                fake_img = self.sess.run(self.test_fake_B, feed_dict = {self.test_image : sample_image, self.test_style : test_style})
-                save_images(fake_img, [1, 1], image_path)
+                        fake_img = self.sess.run(self.test_fake_B, feed_dict = {self.test_image : sample_image, self.test_style : test_style})
+                        save_images(fake_img, [1, 1], image_path)
 
-                index.write("<td>%s</td>" % os.path.basename(image_path))
-                index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                    '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
-                index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                    '../..' + os.path.sep + image_path), self.img_w, self.img_h))
-                index.write("</tr>")
+                        index.write("<td>%s</td>" % os.path.basename(image_path))
+                        index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
+                            '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
+                        index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
+                            '../..' + os.path.sep + image_path), self.img_w, self.img_h))
+                        index.write("</tr>")
 
-        for sample_file  in test_B_files : # B -> A
-            print('Processing B image: ' + sample_file)
-            sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
-            file_name = os.path.basename(sample_file).split(".")[0]
-            file_extension = os.path.basename(sample_file).split(".")[1]
+        if self.direction != 'a2b':
+                for sample_file  in test_B_files : # B -> A
+                    print('Processing B image: ' + sample_file)
+                    sample_image = np.asarray(load_test_data(sample_file, size_h=self.img_h, size_w=self.img_w))
+                    file_name = os.path.basename(sample_file).split(".")[0]
+                    file_extension = os.path.basename(sample_file).split(".")[1]
 
-            for i in range(self.num_style):
-                test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
-                image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
+                    for i in range(self.num_style):
+                        test_style = np.random.normal(loc=0.0, scale=1.0, size=[1, 1, 1, self.style_dim])
+                        image_path = os.path.join(self.result_dir, '{}_style{}.{}'.format(file_name, i, file_extension))
 
-                fake_img = self.sess.run(self.test_fake_A, feed_dict={self.test_image: sample_image, self.test_style: test_style})
-                save_images(fake_img, [1, 1], image_path)
+                        fake_img = self.sess.run(self.test_fake_A, feed_dict={self.test_image: sample_image, self.test_style: test_style})
+                        save_images(fake_img, [1, 1], image_path)
 
-                index.write("<td>%s</td>" % os.path.basename(image_path))
-                index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
-                index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
-                index.write("</tr>")
+                        index.write("<td>%s</td>" % os.path.basename(image_path))
+                        index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
+                                '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
+                        index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
+                                '../..' + os.path.sep + image_path), self.img_w, self.img_h))
+                        index.write("</tr>")
         index.close()
 
     def style_guide_test(self):
