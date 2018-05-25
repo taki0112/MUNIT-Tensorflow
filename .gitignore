@@ -99,3 +99,14 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# MUNIT-Tensorflow output (dir and symbolic link)
+logs/
+logs
+results/
+results
+dataset/
+dataset
+checkpoint/
+checkpoint
+
