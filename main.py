@@ -13,8 +13,13 @@ def parse_args():
     parser.add_argument('--epoch', type=int, default=10, help='The number of epochs to run')
     parser.add_argument('--iteration', type=int, default=100000, help='The number of training iterations')
     parser.add_argument('--batch_size', type=int, default=1, help='The batch size')
+
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
     parser.add_argument('--save_freq', type=int, default=1000, help='The number of ckpt_save_freq')
+    parser.add_argument('--max_to_keep', type=int, default=1000000, help='Maximum number of recent checkpoints to keep')
+    parser.add_argument('--keep_checkpoint_every_n_hours', type=int, default=10000, help='How often to keep checkpoints')
+
+
     parser.add_argument('--num_style', type=int, default=3, help='number of styles to sample')
     parser.add_argument('--direction', type=str, default='a2b', help='direction of style guided image translation')
     parser.add_argument('--guide_img', type=str, default='guide.jpg', help='Style guided image translation')
