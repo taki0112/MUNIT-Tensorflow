@@ -21,8 +21,12 @@ class MUNIT(object) :
         self.gan_type = args.gan_type
 
         self.batch_size = args.batch_size
+
         self.print_freq = args.print_freq
         self.save_freq = args.save_freq
+        self.max_to_keep = args.max_to_keep
+        self.keep_checkpoint_every_n_hours = args.keep_checkpoint_every_n_hours
+
         self.num_style = args.num_style # for test
         self.guide_img = args.guide_img
         self.direction = args.direction
@@ -382,7 +386,7 @@ class MUNIT(object) :
         tf.global_variables_initializer().run()
 
         # saver to save model
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=self.max_to_keep, keep_checkpoint_every_n_hours=self.keep_checkpoint_every_n_hours)
 
         # summary writer
         self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_dir, self.sess.graph)
