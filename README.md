@@ -71,6 +71,7 @@ Simple Tensorflow implementation of ["Multimodal Unsupervised Image-to-Image Tra
 * [CycleGAN-Tensorflow](https://github.com/taki0112/CycleGAN-Tensorflow)
 * [DiscoGAN-Tensorflow](https://github.com/taki0112/DiscoGAN-Tensorflow)
 * [UNIT-Tensorflow](https://github.com/taki0112/UNIT-Tensorflow)
+* [StarGAN-Tensorflow](https://github.com/taki0112/StarGAN-Tensorflow)
 
 ## Reference
 * [MUNIT-Pytorch](https://github.com/NVlabs/MUNIT) (Author implementation)
