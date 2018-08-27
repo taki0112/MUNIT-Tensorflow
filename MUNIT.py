@@ -574,9 +574,9 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
+                        '../../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
+                        '../../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
 
         else :
@@ -590,8 +590,8 @@ class MUNIT(object) :
 
                 index.write("<td>%s</td>" % os.path.basename(image_path))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (sample_file if os.path.isabs(sample_file) else (
-                        '../..' + os.path.sep + sample_file), self.img_w, self.img_h))
+                        '../../..' + os.path.sep + sample_file), self.img_w, self.img_h))
                 index.write("<td><img src='%s' width='%d' height='%d'></td>" % (image_path if os.path.isabs(image_path) else (
-                        '../..' + os.path.sep + image_path), self.img_w, self.img_h))
+                        '../../..' + os.path.sep + image_path), self.img_w, self.img_h))
                 index.write("</tr>")
         index.close()
