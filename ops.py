@@ -1,7 +1,9 @@
 import tensorflow as tf
 import tensorflow.contrib as tf_contrib
+from utils import pytorch_kaiming_weight_factor
 
-weight_init = tf_contrib.layers.variance_scaling_initializer() # kaming init for encoder / decoder
+factor, mode, uniform = pytorch_kaiming_weight_factor(a=0.0, uniform=False)
+weight_init = tf_contrib.layers.variance_scaling_initializer(factor=factor, mode=mode, uniform=uniform)
 weight_regularizer = tf_contrib.layers.l2_regularizer(scale=0.0001)
 
 ##################################################################################
@@ -181,3 +183,18 @@ def L1_loss(x, y):
     loss = tf.reduce_mean(tf.abs(x - y))
 
     return loss
+
+def regularization_loss(scope_name) :
+    """
+    If you want to use "Regularization"
+    g_loss += regularization_loss('generator')
+    d_loss += regularization_loss('discriminator')
+    """
+    collection_regularization = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+
+    loss = []
+    for item in collection_regularization :
+        if scope_name in item.name :
+            loss.append(item)
+
+    return tf.reduce_sum(loss)

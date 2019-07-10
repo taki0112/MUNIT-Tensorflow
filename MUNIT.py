@@ -322,8 +322,8 @@ class MUNIT(object) :
         Discriminator_A_loss = self.gan_w * D_ad_loss_a
         Discriminator_B_loss = self.gan_w * D_ad_loss_b
 
-        self.Generator_loss = Generator_A_loss + Generator_B_loss
-        self.Discriminator_loss = Discriminator_A_loss + Discriminator_B_loss
+        self.Generator_loss = Generator_A_loss + Generator_B_loss + regularization_loss('encoder') + regularization_loss('decoder')
+        self.Discriminator_loss = Discriminator_A_loss + Discriminator_B_loss + regularization_loss('discriminator')
 
         """ Training """
         t_vars = tf.trainable_variables()
