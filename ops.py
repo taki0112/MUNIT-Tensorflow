@@ -17,10 +17,22 @@ def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True,
         else :
             weight_init = tf_contrib.layers.variance_scaling_initializer()
 
-        if pad_type == 'zero' :
-            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
-        if pad_type == 'reflect' :
-            x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]], mode='REFLECT')
+        if pad > 0:
+            h = x.get_shape().as_list()[1]
+            if h % stride == 0:
+                pad = pad * 2
+            else:
+                pad = max(kernel - (h % stride), 0)
+
+            pad_top = pad // 2
+            pad_bottom = pad - pad_top
+            pad_left = pad // 2
+            pad_right = pad - pad_left
+
+            if pad_type == 'zero':
+                x = tf.pad(x, [[0, 0], [pad_top, pad_bottom], [pad_left, pad_right], [0, 0]])
+            if pad_type == 'reflect':
+                x = tf.pad(x, [[0, 0], [pad_top, pad_bottom], [pad_left, pad_right], [0, 0]], mode='REFLECT')
 
         x = tf.layers.conv2d(inputs=x, filters=channels,
                              kernel_size=kernel, kernel_initializer=weight_init,
@@ -29,10 +41,12 @@ def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True,
 
         return x
 
-def linear(x, units, use_bias=True, scope='linear'):
+def fully_connected(x, units, use_bias=True, scope='fully_connected'):
     with tf.variable_scope(scope):
         x = flatten(x)
-        x = tf.layers.dense(x, units=units, kernel_initializer=weight_init, kernel_regularizer=weight_regularizer, use_bias=use_bias)
+        x = tf.layers.dense(x, units=units, kernel_initializer=weight_init,
+                            kernel_regularizer=weight_regularizer,
+                            use_bias=use_bias)
 
         return x
 
@@ -56,16 +70,16 @@ def resblock(x_init, channels, use_bias=True, scope='resblock'):
 
         return x + x_init
 
-def adaptive_resblock(x_init, channels, mu, sigma, use_bias=True, scope='adaptive_resblock') :
+def adaptive_resblock(x_init, channels, gamma1, beta1, gamma2, beta2, use_bias=True, scope='adaptive_resblock') :
     with tf.variable_scope(scope):
         with tf.variable_scope('res1'):
             x = conv(x_init, channels, kernel=3, stride=1, pad=1, pad_type='reflect', use_bias=use_bias)
-            x = adaptive_instance_norm(x, mu, sigma)
+            x = adaptive_instance_norm(x, gamma1, beta1)
             x = relu(x)
 
         with tf.variable_scope('res2'):
             x = conv(x, channels, kernel=3, stride=1, pad=1, pad_type='reflect', use_bias=use_bias)
-            x = adaptive_instance_norm(x, mu, sigma)
+            x = adaptive_instance_norm(x, gamma2, beta2)
 
         return x + x_init
 

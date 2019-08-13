@@ -132,10 +132,12 @@ class MUNIT(object) :
     def generator(self, contents, style, reuse=False, scope="decoder"):
         channel = self.mlp_dim
         with tf.variable_scope(scope, reuse=reuse) :
-            mu, sigma = self.MLP(style, reuse)
+            mu, var = self.MLP(style)
             x = contents
+
             for i in range(self.n_res) :
-                x = adaptive_resblock(x, channel, mu, sigma, scope='adaptive_resblock'+str(i))
+                idx = 2 * i
+                x = adaptive_resblock(x, channel, mu[idx], var[idx], mu[idx + 1], var[idx + 1], scope='adaptive_resblock_'+str(i))
 
             for i in range(self.n_upsample) :
                 # # IN removes the original feature mean and variance that represent important style information
@@ -151,22 +153,29 @@ class MUNIT(object) :
 
             return x
 
-    def MLP(self, style, reuse=False, scope='MLP'):
+    def MLP(self, style, scope='MLP'):
         channel = self.mlp_dim
-        with tf.variable_scope(scope, reuse=reuse) :
-            x = linear(style, channel, scope='linear_0')
-            x = relu(x)
+        with tf.variable_scope(scope) :
+            x = style
 
-            x = linear(x, channel, scope='linear_1')
-            x = relu(x)
+            for i in range(2):
+                x = fully_connected(x, channel, scope='FC_' + str(i))
+                x = relu(x)
 
-            mu = linear(x, channel, scope='mu')
-            sigma = linear(x, channel, scope='sigma')
+            mu_list = []
+            var_list = []
 
-            mu = tf.reshape(mu, shape=[-1, 1, 1, channel])
-            sigma = tf.reshape(sigma, shape=[-1, 1, 1, channel])
+            for i in range(self.n_res * 2):
+                mu = fully_connected(x, channel, scope='FC_mu_' + str(i))
+                var = fully_connected(x, channel, scope='FC_var_' + str(i))
 
-            return mu, sigma
+                mu = tf.reshape(mu, shape=[-1, 1, 1, channel])
+                var = tf.reshape(var, shape=[-1, 1, 1, channel])
+
+                mu_list.append(mu)
+                var_list.append(var)
+
+            return mu_list, var_list
 
     ##################################################################################
     # Discriminator
